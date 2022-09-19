@@ -165,6 +165,27 @@ public class FileLoggerModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void deleteLogFilesByFileNames(String[] fileNames, Promise promise) {
+        try {
+            for (File file: getLogFiles()) {
+                String fileName = file.getName();
+                Boolean isToDeleteFile = isNameIncludedInList(fileName, fileNames);
+
+                if (isToDeleteFile) {
+                    file.delete();
+                }
+            }
+            if (configureOptions != null) {
+                configure(configureOptions, promise);
+            } else {
+                promise.resolve(null);
+            }
+        } catch (Exception e) {
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
     public void sendLogFilesByEmail(ReadableMap options, Promise promise) {
         try {
             ReadableArray to = options.hasKey("to") ? options.getArray("to") : null;
@@ -220,5 +241,14 @@ public class FileLoggerModule extends ReactContextBaseJavaModule {
             strArray[i] = r.getString(i);
         }
         return strArray;
-  }
+    }
+
+    private boolean isNameIncludedInList(String name, String[] list) {
+        for (int i = 0; i < list.length; i++) {
+            if(list[i].endsWith(name)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
